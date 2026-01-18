@@ -653,6 +653,51 @@
         </div>
     </div>
 </div>
+<style>
+  /* --- 04_SPOTS 復古插畫風樣式 --- */
+#spots .page-container { max-width: 480px; margin: 0 auto; padding: 20px; }
+
+#spots header {
+    background: #fdfaf1; border: 3px solid var(--black);
+    border-radius: 15px; padding: 15px; margin-bottom: 25px;
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.2);
+}
+
+#spots .spot-section {
+    background: #fdfaf1; /* 象牙白 */
+    border: 3px solid var(--black);
+    border-radius: 20px;
+    margin-bottom: 25px;
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+#spots .section-header {
+    padding: 10px 15px;
+    border-bottom: 3px solid var(--black);
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+#spots .hk-label { background: #ff9f1c; padding: 2px 10px; border-radius: 10px; font-weight: bold; border: 2px solid var(--black); font-size: 12px; }
+#spots .mo-label { background: #ffde22; padding: 2px 10px; border-radius: 10px; font-weight: bold; border: 2px solid var(--black); font-size: 12px; }
+
+#spots .section-body { padding: 15px; }
+
+#spots .spot-item {
+    margin-bottom: 12px;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 8px;
+    text-transform: none; /* 讓景點介紹可以顯示小寫，更易讀 */
+}
+#spots .spot-item:last-child { border-bottom: none; }
+
+#spots .spot-name { font-weight: bold; color: #1a1a1a; display: block; font-size: 14px; text-transform: uppercase; }
+#spots .spot-info { font-size: 11px; color: #7a7a7a; line-height: 1.4; margin-top: 4px; }
+#spots .transport-note { color: #2a7b7d; font-weight: bold; font-size: 10px; margin-top: 4px; display: block; }
+#spots .pink-tag { color: white; background: #f8a4b4; font-size: 9px; padding: 1px 5px; border-radius: 4px; margin-left: 3px; vertical-align: middle; }
+
+#spots .night-view { background: #1a1a1a; color: #fff; border-radius: 10px; padding: 15px; margin-top: 10px; }
+</style>
 
 <div id="events" class="tab-content" style="padding: 20px; font-family: 'Space Mono', monospace;">
     
@@ -907,37 +952,37 @@ updateUI();
 
         <section class="spot-magazine-block">
             <div class="spot-img-container">
-                <img src="https://images.unsplash.com/photo-1554492548-66270830491a?q=80&w=800" class="spot-img">
+                <img src="https://images.unsplash.com/photo-1590668451500-674ec68b28bd?q=80&w=2938&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="spot-img">
                 <span class="spot-label">#01 MONG KOK</span>
             </div>
             <div class="spot-text-content">
                 <h3 class="spot-h3">旺角：老港味的垂直生活</h3>
-                <p class="spot-p">入住平安大廈是一場冒險。在熙來攘往的彌敦道旁，走進<b>「黑地」</b>挑選一只搪瓷杯，或是到星際城市尋找一台底片相機。這就是 City Boy 的旅行態度：在混亂中尋找質感。</p>
+                <p class="spot-p">入住平安大廈是一場冒險，在熙來攘往的彌敦道旁，走進<b>「黑地」</b>挑選一只搪瓷杯，或是到「星際城市」尋找一台底片相機。這就是 City Girl的旅行態度：在混亂中尋找質感。</p>
                 <div class="spot-meta">📍 旺角站 / 平安大廈 / 黑地</div>
             </div>
         </section>
 
         <section class="spot-magazine-block row-reverse">
             <div class="spot-img-container small">
-                <img src="https://images.unsplash.com/photo-1542301197-ec6af60096cd?q=80&w=800" class="spot-img">
-                <span class="spot-label" style="background:#4c6a92">#02 SSP</span>
+                <img src="https://images.unsplash.com/photo-1564041534084-1be7805e684f?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="spot-img">
+                <span class="spot-label" style="background:#4c6a92">#02 Sham Shui Po</span>
             </div>
             <div class="spot-text-content">
                 <h3 class="spot-h3">深水埗：雅俗共想的選物</h3>
-                <p class="spot-p">鴨寮街不只有電子零件，<b>「雅俗共想」</b>裡的黑膠與舊雜誌才是靈魂。買一份合益泰豬腸粉，坐在路邊觀察這座城市的脈動。</p>
+                <p class="spot-p">近年變身文青天堂，這裡沒有閃亮的摩天大樓，取而代之的是充滿歷史韻味的樸素建築，亦有不少型格咖啡店、當代藝術空間、特色小店等，保留著舊日的風情。</p>
                 <div class="spot-meta">📍 深水埗 C2 出口 / 雅俗共想</div>
             </div>
         </section>
 
         <section class="spot-magazine-block special-accent">
             <div class="spot-img-container">
-                <img src="https://images.unsplash.com/photo-1533423851083-02f5e27a6c93?q=80&w=800" class="spot-img">
+                <img src="https://images.unsplash.com/photo-1701410478990-c44c24d9f6a1?q=80&w=2940&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" class="spot-img">
                 <span class="spot-label" style="background:#e94e77">#03 DISNEY</span>
             </div>
             <div class="spot-text-content">
-                <h3 class="spot-h3">迪士尼：夢幻與現代的交織</h3>
+                <h3 class="spot-h3">迪士尼：夢幻國度</h3>
                 <p class="spot-p">World of Frozen 開幕後，這裡是必經之地。除了設施，園內的字體設計與色彩配置也值得 City Boy 留心紀錄。</p>
-                <div class="spot-meta">📍 迪士尼線 / 魔雪奇緣世界</div>
+                <div class="spot-meta">📍 迪士尼線 / 冰雪奇緣世界</div>
             </div>
         </section>
 

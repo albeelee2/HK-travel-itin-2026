@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 HK/MO TRIP - DEPARTURE MONO STYLE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 配色方案 */
+            --color-01-flight: #2a7b7d; 
+            --color-02-stay: #e59a5d;   
+            --color-03-itinerary: #d64d4d; 
+            --color-04-spots: #4c6a92;  
+            --color-05-events: #b53d6e; 
+            --color-06-budget: #e2c044; 
+            --color-07-shopping: #5e8c61; 
+            --black: #1a1a1a;
+            --white: #ffffff;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background-color: var(--color-01-flight); 
+            color: var(--black);
+            margin: 0; padding: 0;
+            transition: background-color 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        /* 導航列 */
+        nav {
+            display: flex;
+            overflow-x: auto;
+            background: var(--black);
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: var(--white);
+            padding: 8px 15px;
+            font-size: 11px;
+            font-family: 'Space Mono', monospace;
+            white-space: nowrap;
+            opacity: 0.6;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        nav button.active {
+            opacity: 1;
+            border-bottom: 2px solid var(--white);
+            font-weight: bold;
+        }
+
+        /* 分頁切換 */
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .page-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 25px 15px;
+        }
+
+        header, .card, .flight-card {
+            border: 2px solid var(--black);
+            background: var(--white);
+            margin-bottom: 25px;
+            box-shadow: 6px 6px 0px var(--black);
+        }
+
+        header { padding: 15px; }
+        .title-main { font-size: 22px; font-weight: bold; margin-bottom: 5px; }
+        .title-sub { font-size: 10px; letter-spacing: 1px; color: #666; }
+
+        /* 共通卡片樣式 */
+        .card-header {
+            background: var(--black);
+            color: var(--white);
+            padding: 8px 12px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .card-row, .flight-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid #ddd;
+        }
+        .card-row:last-child, .flight-row:last-child { border-bottom: none; }
+
+        .info-box { padding: 12px; border-right: 1px solid #ddd; }
+        .info-box:last-child { border-right: none; }
+
+        .label { font-size: 9px; color: #666; margin-bottom: 4px; }
+        .value { font-size: 14px; font-weight: bold; }
+        .value-time { font-size: 18px; font-weight: bold; color: var(--color-03-itinerary); }
+        .airport-code { font-size: 11px; color: #444; }
+        .address-box { padding: 12px; background: #f5f5f5; font-size: 11px; border-bottom: 1px solid var(--black); }
+
+        /* ITIN 專用樣式 */
+        .day-label { display: inline-block; padding: 4px 12px; font-weight: bold; border: 2px solid var(--black); margin-bottom: 10px; font-size: 13px; }
+        .hk-tag { background: var(--color-02-stay); }
+        .mo-tag { background: var(--color-06-budget); }
+        .itin-item { padding: 12px; border-bottom: 1px dashed #ccc; display: grid; grid-template-columns: 75px 1fr; }
+        .t-time { font-weight: bold; color: var(--color-05-events); font-size: 12px; }
+        .t-desc { font-size: 14px; line-height: 1.5; text-transform: none; }
+        .must { font-weight: bold; color: #000; }
+        .opt { color: #363232; font-size: 12px; }
+
+        footer { text-align: center; font-size: 10px; padding: 40px 0; color: rgba(0,0,0,0.5); }
+.map-link {
+    text-decoration: none;
+    font-size: 16px; /* 稍微放大 Icon 方便點擊 */
+    margin-left: 6px;
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    transition: transform 0.2s ease;
+    /* 移除背景、邊框與固定寬高 */
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.map-link:hover {
+    transform: scale(1.3); /* 滑鼠移上去時 Icon 放大 */
+    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.2)); /* 加上微陰影感 */
+}
+
+.map-link::after {
+    content: '📍'; /* 這裡可以換成 🗺️ 或其他 Icon */
+}
+      .trans {
+    display: block;
+    font-size: 10px;
+    color: var(--color-01-flight);
+    font-weight: bold;
+    margin: 4px 0;
+    letter-spacing: 0.5px;
+}
+    </style>
+</head>
+<body id="body">
+
+<nav>
+    <button onclick="showTab('flight', '--color-01-flight')" class="active">01_FLIGHT</button>
+    <button onclick="showTab('stay', '--color-02-stay')">02_STAY</button>
+    <button onclick="showTab('itin', '--color-03-itinerary')">03_ITIN</button>
+    <button onclick="showTab('spots', '--color-04-spots')">04_SPOTS</button>
+    <button onclick="showTab('events', '--color-05-events')">05_EVENTS</button>
+    <button onclick="showTab('budget', '--color-06-budget')">06_BUDGET</button>
+    <button onclick="showTab('shop', '--color-07-shopping')">07_EXPLORE</button>
+</nav>
+
+<div class="page-container">
+    
+    <div id="flight" class="tab-content active">
+        <header>
+            <div class="title-main">DEPARTURE</div>
+            <div class="title-sub">JAN 24 - JAN 28, 2026 // HKG_MFM</div>
+        </header>
+
+        <div class="flight-card">
+            <div class="card-header"><span>FROM KAOHSIUNG (KHH)</span><span>UO133 / NX668</span></div>
+            <div class="flight-row" style="background: #fdfdfd;"><div class="info-box" style="grid-column: span 2;"><div class="label">OUTBOUND / 1.24 (SAT)</div><div class="value">HK EXPRESS UO133</div></div></div>
+            <div class="flight-row">
+                <div class="info-box"><div class="label">DEP TIME</div><div class="value-time">15:00</div><div class="airport-code">KHH T1</div></div>
+                <div class="info-box"><div class="label">ARR TIME</div><div class="value-time">16:45</div><div class="airport-code">HKG T1</div></div>
+            </div>
+            <div class="flight-row">
+                <div class="info-box"><div class="label">DURATION</div><div class="value">1h 35m</div></div>
+                <div class="info-box"><div class="label">LUGGAGE</div><div class="value">20KG</div></div>
+            </div>
+            <div class="flight-row" style="background: #fdfdfd; border-top: 2px solid var(--black);"><div class="info-box" style="grid-column: span 2;"><div class="label">INBOUND / 1.28 (WED)</div><div class="value">AIR MACAU NX668</div></div></div>
+            <div class="flight-row">
+                <div class="info-box"><div class="label">DEP TIME</div><div class="value-time">12:25</div><div class="airport-code">MFM T1</div></div>
+                <div class="info-box"><div class="label">ARR TIME</div><div class="value-time">13:50</div><div class="airport-code">KHH T1</div></div>
+            </div>
+            <div class="flight-row">
+                <div class="info-box"><div class="label">DURATION</div><div class="value">1h 25m</div></div>
+                <div class="info-box"><div class="label">LUGGAGE</div><div class="value">32KG</div></div>
+            </div>
+        </div>
+
+        <div class="flight-card">
+            <div class="card-header"><span>FROM TAIPEI (TPE)</span><span>UO113 / NX626</span></div>
+            <div class="flight-row">
+                <div class="info-box"><div class="label">OUTBOUND / 1.24</div><div class="value">UO113 14:50-16:55</div></div>
+                <div class="info-box"><div class="label">LUGGAGE</div><div class="value">20KG</div></div>
+            </div>
+            <div class="flight-row" style="border-top: 1px solid var(--black);">
+                <div class="info-box"><div class="label">INBOUND / 1.28</div><div class="value">NX626 19:20-21:10</div></div>
+                <div class="info-box"><div class="label">LUGGAGE</div><div class="value">32KG</div></div>
+            </div>
+        </div>
+    </div>
+
+  
+    <div id="stay" class="tab-content">
+        <header><div class="title-main">ACCOMMODATION</div><div class="title-sub">BOOKING_REF // HK_MO_2026</div></header>
+        <div class="card">
+            <div class="card-header"><span>JAN 24 - JAN 27 (3 NIGHTS)</span><span class="hk-tag" style="color:black; padding:0 5px;">HK</span></div>
+            <div class="card-row"><div class="info-box" style="grid-column: span 2;"><div class="label">HOTEL / PLATFORM</div><div class="value">市中心家庭房 #502 (Airbnb)</div></div></div>
+            <div class="card-row">
+                <div class="info-box"><div class="label">CONFIRMATION #</div><div class="value">HMYBM3YQ8N</div></div>
+                <div class="info-box"><div class="label">TOTAL PRICE</div><div class="value">TWD 7,219</div></div>
+            </div>
+            <div class="address-box">📍 383 Nathan Road 平安大廈10字樓18室, 九龍<br>📱 CONTACT: WhatsApp</div>
+            <div class="card-row">
+                <div class="info-box"><div class="label">CHECK-IN</div><div class="value-time">14:00</div></div>
+                <div class="info-box"><div class="label">CHECK-OUT</div><div class="value-time">11:00</div></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><span>JAN 27 - JAN 28 (1 NIGHT)</span><span class="mo-tag" style="color:black; padding:0 5px;">MO</span></div>
+            <div class="card-row"><div class="info-box" style="grid-column: span 2;"><div class="label">HOTEL / PLATFORM</div><div class="value">利澳酒店 (RIO HOTEL MACAU) / Agoda</div></div></div>
+            <div class="card-row">
+                <div class="info-box"><div class="label">CONFIRMATION #</div><div class="value">1688018062</div></div>
+                <div class="info-box"><div class="label">TOTAL PRICE</div><div class="value">TWD 3,188</div></div>
+            </div>
+            <div class="address-box">📍 澳門新口岸高美士街33號<br>📱 CONTACT: Agoda APP</div>
+            <div class="card-row">
+                <div class="info-box"><div class="label">CHECK-IN</div><div class="value-time">15:00</div></div>
+                <div class="info-box"><div class="label">CHECK-OUT</div><div class="value-time">12:00</div></div>
+            </div>
+        </div>
+    </div>
+
+  
+<div id="itin" class="tab-content">
+    <header>
+        <div class="title-main">03_ITINERARY</div>
+        <div class="title-sub">REAL-TIME DATA FLOW // JAN 2026</div>
+    </header>
+
+    <div style="display: flex; overflow-x: auto; gap: 10px; margin-bottom: 20px; padding-bottom: 5px;">
+        <button class="day-label hk-tag" onclick="showItinDay('itin-d1')" style="cursor:pointer; white-space:nowrap;">DAY 01</button>
+        <button class="day-label hk-tag" onclick="showItinDay('itin-d2')" style="cursor:pointer; opacity:0.5;">DAY 02</button>
+        <button class="day-label hk-tag" onclick="showItinDay('itin-d3')" style="cursor:pointer; opacity:0.5;">DAY 03</button>
+        <button class="day-label mo-tag" onclick="showItinDay('itin-d4')" style="cursor:pointer; opacity:0.5;">DAY 04</button>
+        <button class="day-label mo-tag" onclick="showItinDay('itin-d5')" style="cursor:pointer; opacity:0.5;">DAY 05</button>
+    </div>
+
+<div id="itin-d1" class="itin-day-content">
+        <div class="day-label hk-tag">DAY 01 // 1.24 (六) // 抵達 香港 ➔ 旺角</div>
+        <div class="card">
+            <div class="itin-item">
+                <div class="t-time">FLIGHT</div>
+                <div class="t-desc">
+                    <span class="must">14:50 山姆出發 (TPE)</span><br>
+                    <span class="must">15:00 蓁賴出發 (KHH)</span><br>
+                    <span class="must">16:35 蓁賴抵達 (HKG)</span><br>
+                    <span class="must">16:55 山姆抵達 (HKG)</span>
+                </div>
+            </div>
+
+            <div class="itin-item">
+                <div class="t-time">AIRPORT</div>
+                <div class="t-desc">
+                    <span class="must">香港機場<a href="https://www.google.com/maps/search/香港機場" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">復古麥當勞 (接機大廳A) </span><br>
+                   <span class="opt"> 磁磚拼貼工作坊 N32-34 17-18</span><br>
+                    <span class="opt">超酷觀景台 <span class="tag-pill">13-22</span> (登機門處) </span>
+                </div>
+            </div>
+ <div class="itin-item" style="background:#fdf9f0">
+                <div class="t-time">TRANSIT</div>
+                <div class="t-desc">
+                  <span class="must">機場快線(香港站) - 地鐵(中環) -地鐵(佐敦)</span></br>
+                    <span class="must">機場快線(九龍站) - 九龍巴士站(8) -南京街 彌敦道</span>
+                    </span>
+                </div>
+            </div>
+            <div class="itin-item">
+                <div class="t-time">CITY</div>
+                <div class="t-desc">
+                    <span class="must">旺角</span><br>
+                    <span class="opt">福誠找換 <span class="tag-pill">11-21</span> <a href="https://www.google.com/maps/search/福誠找換" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">黑地 復古雜貨 <span class="tag-pill">12-20</span> <a href="https://www.google.com/maps/search/黑地+Hak+Dei" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">樂高 朗豪坊 <span class="tag-pill">11-21</span> <a href="https://www.google.com/maps/search/LEGO+Store+Langham+Place" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">怪店 Kaiten <span class="tag-pill">12-22</span> <a href="https://www.google.com/maps/search/怪店+Kaiten" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">星際城市 <span class="tag-pill">10.5-23</span> <a href="https://www.google.com/maps/search/Sim+City+Mong+Kok" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+            <div class="address-box">🏨 住宿: <a href="https://www.google.com/maps/search/平安大廈+Nathan+Road" target="_blank" style="color:inherit;">香港 Airbnb (平安大廈)</a></div>
+        </div>
+    </div>
+
+    <div id="itin-d2" class="itin-day-content" style="display:none;">
+        <div class="day-label hk-tag">DAY 02 // 1.25 (日) // 九龍 ➔ 港島</div>
+        <div class="card">
+            <div class="itin-item">
+                <div class="t-time">MORNING</div>
+                <div class="t-desc">
+                    <span class="must">平安大樓周邊</span><br>
+                    <span class="opt">百寶茶檔 <span class="tag-pill">06.5-18</span> <a href="https://www.google.com/maps/search/百寶茶檔" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">巧佳小巴用品 <span class="tag-pill">10.5-18</span> <a href="https://www.google.com/maps/search/巧佳小巴用品" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">澳洲牛奶公司 <span class="tag-pill">7-22</span> <a href="https://www.google.com/maps/search/巧佳小巴用品" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+           <div class="itin-item" style="background:#fdf9f0">
+                <div class="t-time">TRANSIT</div>
+                <div class="t-desc">
+                    <span class="must">地鐵佐敦站 ⭢ 深水埗站</span><a href="https://www.google.com/maps/search/地鐵深水埗站" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+            <div class="itin-item">
+                <div class="t-time">SSP</div>
+                <div class="t-desc">
+                    <span class="must">⭢ 深水埗</span><br>
+                    <span class="opt">鴨寮街 <a href="https://www.google.com/maps/search/鴨寮街" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">雅俗共想 good bad creative 13-19.5 <a href="https://www.google.com/maps/search/雅俗共想+Good+Bad+Creative" target="_blank" class="map-link"></a></span><br>
+                  <span class="opt">舊時代雜貨店 <a href="https://www.google.com/maps/search/舊時代雜貨店" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">漢發麵家 or 新香園 (堅記) <a href="https://www.google.com/maps/search/漢發麵家" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">關東店便宜扭蛋 <a href="https://www.google.com/maps/search/關東店+深水埗" target="_blank" class="map-link"></a></span><br>
+                  <span class="opt">黃道益堂 9-17.5 日休 <a href="https://www.google.com/maps/search/黃道益堂" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+         <div class="itin-item" style="background:#fdf9f0">
+                <div class="t-time">TRANSIT</div>
+                <div class="t-desc">
+                    <span class="must">地鐵</span></span>
+                </div>
+            </div>
+          <div class="itin-item">
+                <div class="t-time">TST</div>
+                <div class="t-desc">
+                    <span class="must">⭢ 尖沙咀(不搭H2可免來)
+                  </span><br>
+                    <span class="opt">Hashtag B 蛋塔 <span class="tag-pill">08-22</span> <a href="https://www.google.com/maps/search/Hashtag+B+Tsim+Sha+Tsui" target="_blank" class="map-link"></a></span><br>
+                   <span class="opt">Bakehouse 蛋塔 <span class="tag-pill">8-21</span> <a href="https://www.google.com/maps/search/Hashtag+B+Tsim+Sha+Tsui" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">龍城大藥房 <a href="https://www.google.com/maps/search/龍城大藥房+尖沙咀" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+ <div class="itin-item" style="background:#fdf9f0">
+                <div class="t-time">TRANSIT</div>
+                <div class="t-desc">
+                   <span class="must">觀光城巴 H2（尖沙咀→ 油麻地→ 旺角 →西九文化區 →中環（天星碼頭）12:30 - 19:30）OR 地鐵</span><a href="https://www.google.com/maps/search/觀光城巴H2" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+                    <div class="itin-item">
+                <div class="t-time">S.WAN</div>
+                <div class="t-desc">
+                    <span class="must">⭢ 上環</span><br>
+                    <span class="opt">Select 18 <span class="tag-pill">12-19</span> <a href="https://www.google.com/maps/search/Select+18+Hong+Kong" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">太平山摩羅上街(古董市集)  <a href="https://www.google.com/maps/search/太平山摩羅上街" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">Mount Zero 見山書店<span class="tag-pill"> 12-18</span> <a href="https://www.google.com/maps/search/Mount Zero 見山書店" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">太平山頂纜車 <span class="tag-pill">7.5-23</span> <a href="https://www.google.com/maps/search/中環花園道山頂纜車總站" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+  <div class="itin-item" style="background:#fdf9f0">
+                <div class="t-time">TRANSIT</div>
+                <div class="t-desc">
+                    <span class="must">叮叮車</span></span>
+                </div>
+            </div>
+        <div class="itin-item">
+                <div class="t-time">C.WAN</div>
+                <div class="t-desc">
+                    <span class="must">⭢ 中環</span><br>
+                    <span class="opt">PMQ 元創方<span class="tag-pill">12-23</span> <a href="https://www.google.com/maps/search/PMQ 元創方" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">中環街市 <span class="tag-pill">-22</span> <a href="https://www.google.com/maps/search/中環街市 " target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">中環半山扶手電梯 <span class="tag-pill">06-00</span> <a href="https://www.google.com/maps/search/06-00" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">Five Guys <span class="tag-pill">11-22</span> <a href="https://www.google.com/maps/search/Five+Guys+Central" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+           
+          <div class="address-box">🏨 住宿: <a href="https://www.google.com/maps/search/平安大廈+Nathan+Road" target="_blank" style="color:inherit;">香港 Airbnb (平安大廈)</a></div>
+        </div>
+        </div>
+    </div>
+ <div id="itin-d3" class="itin-day-content" style="display:none;">
+        <div class="day-label hk-tag">DAY 03 // 1.26 (一) // 迪士尼樂園</div>
+        <div class="card">
+            <div class="itin-item">
+                <div class="t-time">OPEN</div>
+                <div class="t-desc">
+                    <span class="must">香港迪士尼樂園 <span class="tag-pill">10:00-20:30</span> <a href="https://www.google.com/maps/search/?api=1&query=Hong+Kong+Disneyland" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+
+            <div class="itin-item">
+                <div class="t-time">MUST RIDE</div>
+                <div class="t-desc">
+                    <span class="opt">魔雪奇緣世界：魔雪奇幻之旅</span><br>
+                    <span class="opt">玩具總動員大本營</span><br>
+                    <span class="opt">迷離莊園：迷離大宅 (港獨家)</span><br>
+                    <span class="opt">灰熊山極速礦車 (港獨家)</span><br>
+                   <span class="opt">森林河流之旅</span><br>
+                    <span class="opt">明日世界：星戰急速穿梭</span><br>
+                    <span class="opt">蟻俠與黃蜂女：擊戰特攻！</span>
+                </div>
+            </div>
+
+            <div class="itin-item" style="background: #fff9f9;">
+                <div class="t-time">SHOWS</div>
+                <div class="t-desc">
+                    <span class="must">迪士尼好友巡遊派對</span><br>
+                    <span class="tag-pill">12:45 / 17:00</span><br><br>
+                    <span class="must">獅子王慶典</span><br>
+                    <span class="tag-pill">14:30 / 17:00 / 18:30</span><br><br>
+                    <span class="must">迪士尼魔法書房</span><br>
+                    <span class="tag-pill">11:15 / 12:30 / 13:45 / 16:30 / 17:45 / 19:00</span>
+                </div>
+            </div>
+
+            <div class="itin-item">
+                <div class="t-time">NIGHT</div>
+                <div class="t-desc">
+                    <span class="must">迪士尼星夢光影之旅 (煙火)</span><br>
+                    <span class="tag-pill">20:30</span>
+                </div>
+            </div>
+        </div>
+    </div>
+   <div id="itin-d4" class="itin-day-content" style="display:none;">
+        <div class="day-label mo-tag">DAY 04 // 1.27 (二) // 香港 ➔ 澳門 ➔ 氹仔</div>
+        <div class="card">
+            
+            <div class="itin-item">
+                <div class="t-time">TRANSIT</div>
+                <div class="t-desc">
+                    <span class="must">珠港澳金巴 (香港口岸) <span class="tag-pill">06-23</span> <a href="https://www.google.com/maps/search/?api=1&query=HZMB+Hong+Kong+Port" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">班次：每 15 分鐘一班車</span>
+                </div>
+            </div>
+
+            <div class="itin-item" style="background:#f0f4f7">
+                <div class="t-time">TRANSIT</div>
+                <div class="t-desc">
+                    <span class="must">任一家接駁車⭢ 港澳碼頭 ➔ 轉利澳接駁車</span><br>
+                    <span class="must">利澳酒店放行李 <a href="https://www.google.com/maps/search/?api=1&query=Rio+Hotel+Macau" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+
+            <div class="itin-item">
+                <div class="t-time">MACAU CITY</div>
+                <div class="t-desc">
+                    <span class="must">澳門半島</span><br>
+                    <span class="opt">龍華茶樓 (粵式早茶) <span class="tag-pill">08-14</span> <a href="https://www.google.com/maps/search/?api=1&query=Lung+Wa+Tea+House" target="_blank" class="map-link"></a></span><br>
+                    <span class="trans">👣 walk 6 min ⭢</span><br>
+                    <span class="opt">嘉路米耶圓形地 (三盞燈) <a href="https://www.google.com/maps/search/?api=1&query=Rotunda+de+Carlos+da+Maia" target="_blank" class="map-link"></a></span><br>
+                    <span class="trans">👣 walk 15 min ⭢</span><br>
+                    <span class="opt">大三巴牌坊 <a href="https://www.google.com/maps/search/?api=1&query=大三巴牌坊" target="_blank" class="map-link"></a></span><br>
+                  <span class="opt">議事亭前地 <a href="https://www.google.com/maps/search/?api=1&query=議事亭前地" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">壹燕糖甜品 <a href="https://www.google.com/maps/search/?api=1&query=Yi+Yin+Tong+Dessert" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+
+            <div class="itin-item" style="background:#fdf9f0">
+                <div class="t-time">SHUTTLE</div>
+                <div class="t-desc">
+                    <span class="must">⭢ 新葡京酒店搭接駁車 <span class="tag-pill">10-23:45</span> <a href="https://www.google.com/maps/search/?api=1&query=Grand+Lisboa+Hotel" target="_blank" class="map-link"></a></span><br>
+                    <span class="must">前往氹仔 (Taipa)</span>
+                </div>
+            </div>
+
+            <div class="itin-item">
+                <div class="t-time">TAIPA</div>
+                <div class="t-desc">
+                    <span class="must">氹仔&金光大道</span><br>
+                    <span class="opt">澳門官也街 <a href="https://www.google.com/maps/search/?api=1&query=Rua+do+Cunha" target="_blank" class="map-link"></a></span><br>
+                  <span class="opt">澤賢記雞蛋仔 <a href="https://www.google.com/maps/search/?api=1&query=澤賢記 (官也街店)" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">龍環葡韻住宅式博物館 <a href="https://www.google.com/maps/search/?api=1&query=Taipa+Houses+Museum" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">大潭山斜行升降機 (夜景) <span class="tag-pill">06-00</span> <a href="https://www.google.com/maps/search/?api=1&query=Taipa+Grande+Inclined+Lift" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">澳門巴黎人 (賺大錢) <a href="https://www.google.com/maps/search/?api=1&query=The+Parisian+Macao" target="_blank" class="map-link"></a></span>
+                </div>
+            </div>
+
+            <div class="address-box">🏨 STAY: 澳門 利澳酒店 (Rio Hotel)</div>
+        </div>
+    </div>
+   <div id="itin-d5" class="itin-day-content" style="display:none;">
+        <div class="day-label mo-tag">DAY 05 // 1.28 (三) // 早起才能去 ➔ 澳門機場  ➔ 溫暖的家</div>
+        <div class="card">
+            
+            <div class="itin-item">
+                <div class="t-time">MORNING</div>
+                <div class="t-desc">
+                    <span class="must">澳門漁人碼頭 <a href="https://maps.app.goo.gl/9rPq9E1p9C9P9P9P9" target="_blank" class="map-link"></a></span><br>
+                    <span class="opt">古羅馬競技場景點</span>
+                </div>
+            </div>
+
+            <div class="itin-item" style="border-left: 4px solid #ff6b6b; background: #fff5f5;">
+                <div class="t-time">FLIGHT A</div>
+                <div class="t-desc">
+                    <span class="must">蓁、賴 ➔ 澳門機場 <a href="https://maps.app.goo.gl/3rPq9E1p9C9P9P9P9" target="_blank" class="map-link"></a></span><br>
+                    <span class="tag-pill">12:25</span> 離境出發<br>
+                    <span class="tag-pill">13:50</span> 抵達台灣<br>
+                    <span class="opt" style="color:#d63031;">🚗 威廷接機 (小港機場)</span>
+                </div>
+            </div>
+
+            <div class="itin-item" style="background:#f0f7f4">
+                <div class="t-time">DINNER</div>
+                <div class="t-desc">
+                    <span class="must">開飯川食堂 - 義享店 <a href="https://maps.app.goo.gl/5rPq9E1p9C9P9P9P9" target="_blank" class="map-link"></a></span><br>
+                    <span class="tag-pill">19:00</span> 聚餐時間
+                </div>
+            </div>
+
+            <div class="itin-item" style="border-left: 4px solid #4834d4; background: #f0f0ff;">
+                <div class="t-time">FLIGHT B</div>
+                <div class="t-desc">
+                    <span class="must">山姆 ➔ 澳門機場</span><br>
+                    <span class="tag-pill">19:20</span> 離境出發<br>
+                    <span class="tag-pill">21:10</span> 抵達台灣
+                </div>
+            </div>
+
+            <div class="address-box">🏠 BACK HOME // 旅途愉快！</div>
+        </div>
+    </div>
+
+    <div id="spots" class="tab-content">
+    <div class="page-container">
+        <header>
+            <div style="font-size: 20px; font-weight: bold;">04_SPOTS</div>
+            <div style="font-size: 10px;">SORTED BY GEOLOCATION</div>
+        </header>
+
+        <div class="spot-section">
+            <div class="section-header">
+                <span class="hk-label">香港機場 HKG</span>
+                <span style="font-size: 10px;">LANTAU</span>
+            </div>
+            <div class="section-body">
+                <div class="spot-item">
+                    <span class="spot-name">T1 離境區</span>
+                    <span class="spot-info">G.O.D. 住好啲(6F)、施施百貨(L7)、BANDAI 扭蛋(L7)、POPMART(L7)、%ARABICA(L6)</span>
+                </div>
+                <div class="spot-item">
+                    <span class="spot-name"> 登機門Gate 10-22</span>
+                    <span class="spot-info">超酷觀景台 (天際走廊旁)</span>
+                </div>
+                <div class="spot-item">
+                    <span class="spot-name">接機大廳<span class="pink-tag">MUST</span></span>
+                    <span class="spot-info">城市縮影展覽、舊麥當勞氛圍</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="spot-section">
+            <div class="section-header">
+                <span class="hk-label">九龍 KOWLOON</span>
+                <span style="font-size: 10px;">NORTH TO SOUTH</span>
+            </div>
+            <div class="section-body">
+                <div class="spot-item">
+                    <span class="spot-name">深水埗 <span class="pink-tag">文青老街</span></span>
+                    <span class="spot-info">鴨寮街(二手相機)、情迷相機、漢發麵家 (港點.彭于晏愛店)、雅俗共想(13-19.5)、文化屋雜貨店、SHOWA CITY CLUB(黑膠.玩具.美少女戰士)、舊時代老物、溢泰行(港風布料帆布包)、香港設計中心DX Design</span>
+                    <span class="transport-note">多數店鋪下午開門</span>
+                </div>
+              <div class="spot-item">
+                    <span class="spot-name">太子站 <span class="pink-tag">文青老街</span></span>
+                    <span class="spot-info">TWEMCO 翻頁鐘、MIDWAY SHOP、80M巴士專門店</span>
+                </div>
+                <div class="spot-item">
+                    <span class="spot-name">旺角 <span class="pink-tag">鬧區</span></span>
+                    <span class="spot-info">怪店 KAITEN(12-22)、朗豪坊樂高(11-21)、LOG-ON、黑地復古雜貨、SHOWA Film & Camera 菲林、上海街618號(古蹟活化文創店)、星際城市（中僑商業大樓</span>
+                </div>
+              <div class="spot-item">
+                    <span class="spot-name">油麻地 <span class="pink-tag">鬧區</span></span>
+                    <span class="spot-info">KUBRICK 書店、油麻地果欄（水果攤）、巧佳小巴用品、美都餐室</span>
+                </div>
+                <div class="spot-item">
+                    <span class="spot-name">尖沙咀 <span class="pink-tag">維港</span></span>
+                    <span class="spot-info">HASHTAG B & BAKEHOUSE (蛋塔戰區)、星光大道、維多利亞港、M+藝術博物館</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="spot-section">
+            <div class="section-header">
+                <span class="hk-label">港島 HONG KONG IS.</span>
+                <span style="font-size: 10px;">WEST TO EAST</span>
+            </div>
+            <div class="section-body">
+                <div class="spot-item">
+                    <span class="spot-name">上環 <span class="pink-tag">坡道</span></span>
+                    <span class="spot-info">SELECT 18(12-19)、兆成行精油、見山書店、摩羅上街(古董)、PMQ 元創方、、太平山頂纜車、山頂凌霄閣、Jenny Bakery 珍妮曲奇餅乾</span>
+                </div>
+              <div class="spot-item">
+                    <span class="spot-name">中環 <span class="pink-tag">坡道</span></span>
+                    <span class="spot-info">大館古蹟及藝術館：綜合歷史文創園區8-23 free、半山扶手電梯、中環街市、嘉咸街壁畫、藍瓶咖啡 (擺花街)、泰昌餅家、Vission Bakery、蘭芳園 中環總店、威靈頓街、Five Guys 11-22、蘭桂坊(香港夜生活.酒吧)、落日飛車 觀光城巴(尖沙咀-中環)</span>
+                </div>
+                <div class="spot-item">
+                    <span class="spot-name">灣仔</span>
+                    <span class="spot-info">藍屋、灣仔郵政局、鴻興玩具、檀島咖啡餅店
+、HKTDC Design Gallery、精神書局 - 灣仔店(二手)</span>
+                </div>
+              <div class="spot-item">
+                    <span class="spot-name">銅鑼灣</span>
+                    <span class="spot-info">誠品書店、艺鵠書店(ZINE) 13-19、無印良品</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="spot-section">
+            <div class="section-header"><span class="hk-label">離島/景點</span><span style="font-size: 10px;">SPECIAL</span></div>
+            <div class="section-body">
+                <div class="spot-item">
+                    <span class="spot-name">長洲漁村</span>
+                    <span class="spot-info">渡日書店(ZINE)、允升甜品、平記芒果糯米糍、長洲鐵漢</span>
+                    <span class="transport-note">中環5號碼頭 🚢 45-50MIN / $14.5</span>
+                </div>
+                <div class="spot-item">
+                    <span class="spot-name">彩虹邨</span>
+                    <span class="spot-info">拍照必去經典色彩建築</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="night-view">
+            <div style="font-weight: bold; margin-bottom: 8px;">🌃 FREE NIGHT VIEW</div>
+            <div style="font-size: 11px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <span>• 香港藝術館-城市線</span>
+                <span>• 西九文化區</span>
+                <span>• 海運觀點 (海港城)</span>
+                <span>• 灣仔合和景觀電梯</span>
+                <span>• 盧吉道 (大平山)</span>
+                <span>• 東岸公園主題區（銅鑼灣）</span>
+            </div>
+        </div>
+
+        <div class="spot-section" style="margin-top: 25px;">
+            <div class="section-header">
+                <span class="mo-label">澳門 MACAU</span>
+                <span style="font-size: 10px;">NORTH TO SOUTH</span>
+            </div>
+            <div class="section-body">
+                <div class="spot-item">
+                    <span class="spot-name">澳門半島 (市中心)</span>
+                    <span class="spot-info">珠港澳金巴入境口、龍華茶樓(粵式早茶) 8-14、嘉路米耶圓形地 三盞燈、瘋堂斜巷(葡式建築街)、仁慈堂婆仔屋(文創園區)、大三巴牌坊、議事亭前地、壹燕糖甜品、福隆新街、十月初五日街</span>
+                </div>
+                <div class="spot-item">
+                    <span class="spot-name">氹仔 & 路環 <span class="pink-tag">南部</span></span>
+                    <span class="spot-info">澳門機場、澳門官也街、大潭山斜行升降機(夜景)、龍環葡韻住宅式博物館、澳門巴黎人、路環安德魯蛋撻</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="events" class="tab-content" style="padding: 20px; font-family: 'Space Mono', monospace;">
+    
+    <div style="background: #fdfaf1; border: 3px solid #1a1a1a; border-radius: 15px; padding: 15px; margin-bottom: 25px; box-shadow: 8px 8px 0px rgba(0,0,0,0.2);">
+        <div style="font-size: 20px; font-weight: bold;">05_EVENTS </div>
+        <div style="font-size: 10px; color: #666;">JAN 2026 // HK_EXHIBITION</div>
+    </div>
+
+    <div style="background: #fdfaf1; border: 3px solid #1a1a1a; border-radius: 20px; margin-bottom: 25px; overflow: hidden; box-shadow: 6px 6px 0px rgba(0,0,0,0.1);">
+        <div style="background: #e94e77; color: white; padding: 8px 15px; font-weight: bold; border-bottom: 3px solid #1a1a1a;">MUST SEE</div>
+        <div style="padding: 15px;">
+            <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">古埃及文明大展</div>
+            <div style="font-size: 11px; color: #555; margin-bottom: 10px;">📍 香港故宮文化博物館</div>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <span style="background: #ffde22; border: 1.5px solid #1a1a1a; padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: bold;">埃及博物館珍藏</span>
+                <span style="background: #b5e48c; border: 1.5px solid #1a1a1a; padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: bold;">售票行程</span>
+            </div>
+            <div style="font-size: 12px; line-height: 1.5; color: #333; text-transform: none; border-top: 1px dashed #ccc; padding-top: 10px;">
+                集結埃及博物館珍藏，展出極其罕見的古埃及文物，建議預約故宮門票。
+            </div>
+        </div>
+    </div>
+    <div style="background: #fdfaf1; border: 3px solid #1a1a1a; border-radius: 20px; margin-bottom: 25px; overflow: hidden; box-shadow: 6px 6px 0px rgba(0,0,0,0.1);">
+        <div style="background: #e94e77; color: white; padding: 8px 15px; font-weight: bold; border-bottom: 3px solid #1a1a1a;">本次無緣</div>
+        <div style="padding: 15px;">
+            <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px;">跑馬地馬場Happy Valley Racecourse</div>
+            <div style="font-size: 11px; color: #555; margin-bottom: 10px;">📍 跑馬地總站</div>
+            <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+                <span style="background: #ffde22; border: 1.5px solid #1a1a1a; padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: bold;"> 週三限定</span>
+            </div>
+            <div style="font-size: 12px; line-height: 1.5; color: #333; text-transform: none; border-top: 1px dashed #ccc; padding-top: 10px;">
+                下注：	要先到櫃檯購買現金券，然後才能用自動下注機下注！</br>時間：	晚上7點開始，每場賽事間隔約30至40分鐘</br>日期：	星期三晚上進行</br>入場費：	HK$10
+            </div>
+        </div>
+    </div>
+
+    <div style="background: #fdfaf1; border: 3px solid #1a1a1a; border-radius: 20px; margin-bottom: 25px; overflow: hidden; box-shadow: 6px 6px 0px rgba(0,0,0,0.1);">
+        <div style="background: #ff9f1c; color: #1a1a1a; padding: 8px 15px; font-weight: bold; border-bottom: 3px solid #1a1a1a;">🌇 落日飛車 觀光城巴</div>
+        <div style="padding: 15px;">
+            <div style="font-size: 12px; color: #555; margin-bottom: 12px;">中環 6-7 號碼頭之間 / 尖沙咀天星碼頭</div>
+            
+            <div style="background: #fff; border: 2px solid #1a1a1a; border-radius: 10px; padding: 10px; margin-bottom: 8px;">
+                <div style="font-weight: bold; font-size: 12px; color: #2a7b7d;">H1 懷舊之旅 (11:00-18:00)</div>
+                <div style="font-size: 11px; text-transform: none;">中環 ➔ 荷李活道 ➔ 灣仔 ➔ 銅鑼灣 ➔ 尖沙咀</div>
+            </div>
+            <div style="background: #fff; border: 2px solid #1a1a1a; border-radius: 10px; padding: 10px; margin-bottom: 8px;">
+                <div style="font-weight: bold; font-size: 12px; color: #2a7b7d;">H2 晚遊之旅 (12:30-19:30)</div>
+                <div style="font-size: 11px; text-transform: none;">尖沙咀 ➔ 油麻地 ➔ 旺角 ➔ 西九文化區 ➔ 中環</div>
+            </div>
+            <div style="background: #fff; border: 2px solid #1a1a1a; border-radius: 10px; padding: 10px;">
+                <div style="font-weight: bold; font-size: 12px; color: #e94e77;">H4 海岸線 (落日飛車首選)</div>
+                <div style="font-size: 11px; text-transform: none;">赤柱 ➔ 海洋公園 ➔ 香港仔 ➔ 堅彌地城 ➔ 中環</div>
+            </div>
+
+            <div style="margin-top: 12px; font-size: 11px;">
+                直接刷八達通。每15分鐘一班。 <span style="background: #1a1a1a; color: #fff; padding: 1px 5px; border-radius: 4px;">HK$47-49</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+        <div style="background: #fdfaf1; border: 3px solid #1a1a1a; border-radius: 15px; padding: 12px;">
+            <div style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">璀璨霓虹展</div>
+            <div style="font-size: 10px; text-transform: none; color: #666;">DX設計館 / 免費</div>
+        </div>
+        <div style="background: #fdfaf1; border: 3px solid #1a1a1a; border-radius: 15px; padding: 12px;">
+            <div style="font-weight: bold; font-size: 13px; margin-bottom: 5px;">香港機場 彩繪麻將 & 磁磚拼貼工作坊</div>
+          <div style="font-size: 10px; text-transform: none; color: #666;">地點：	N32-34</br>
+本次時間：	17:00-18:00</div>
+        </div>
+    </div>
+    </div>
+      
+<div id="budget" class="tab-content">
+    <div style="background: #fdfaf1; border: 2px solid #1a1a1a; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 6px 6px 0px var(--black); position: relative;">
+        <div style="font-size: 12px; font-weight: bold; margin-bottom: 5px;">06_TOTAL EXPENSE</div>
+        <div style="font-size: 28px; font-weight: bold; color: #1a1a1a;">NT$ <span id="display-grand-total">0</span></div>
+        
+        <div style="height: 12px; background: #eee; border: 2px solid #1a1a1a; border-radius: 6px; margin: 15px 0; overflow: hidden;">
+            <div id="budget-progress" style="width: 0%; height: 100%; background: #4c6a92; transition: width 0.5s ease;"></div>
+        </div>
+        
+        <div style="font-size: 11px; color: #666; text-transform: none;">
+            ✦ 目標預算: NT$ 35,000 (含預付與換匯預算)
+        </div>
+        <div style="position: absolute; top: 15px; right: 15px; font-size: 24px;">💰</div>
+    </div>
+
+    <div style="background: #f5f5f5; border: 2px solid #1a1a1a; border-radius: 15px; padding: 15px; margin-bottom: 25px; opacity: 0.9;">
+        <div style="font-size: 11px; font-weight: bold; color: #666; margin-bottom: 10px; display: flex; justify-content: space-between;">
+            <span>PRE-PAID ITEMS (已付固定開支)</span>
+            <span style="color: #e94e77;">NT$ 17,907</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 10px;">
+            <div style="background:#fff; padding:6px; border:1px solid #ddd; border-radius:4px;">✈️ 機票: 5,767</div>
+            <div style="background:#fff; padding:6px; border:1px solid #ddd; border-radius:4px;">🏨 住宿: 3,469</div>
+            <div style="background:#fff; padding:6px; border:1px solid #ddd; border-radius:4px;">🌐 eSIM網卡: 359</div>
+            <div style="background:#fff; padding:6px; border:1px solid #ddd; border-radius:4px;">🛡️ 旅平險: 312</div>
+            <div style="background:#fff; padding:6px; border:1px solid #ddd; border-radius:4px; grid-column: span 2;">💵 換匯(達叔): NT$ 8,000</div>
+        </div>
+    </div>
+
+    <div style="background: #fff; border: 2px solid #1a1a1a; border-radius: 15px; padding: 15px; margin-bottom: 25px; box-shadow: 6px 6px 0px var(--black);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="font-size: 11px; font-weight: bold; color: #666;">ADD NEW EXPENSE</div>
+            <div onclick="toggleCurrency()" id="currency-toggle" style="background: #eee; border: 2px solid #1a1a1a; border-radius: 20px; padding: 2px 10px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; gap: 5px; align-items: center;">
+                <span id="cur-twd" style="color: #1a1a1a;">TWD</span>
+                <span style="color: #ccc;">|</span>
+                <span id="cur-hkd" style="color: #ccc;">HKD</span>
+            </div>
+        </div>
+        
+        <div id="type-buttons" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px;">
+            <button onclick="selectType('transport', this)" class="type-btn active" style="padding: 10px 0; border: 2px solid #1a1a1a; border-radius: 8px; background: #fff; cursor: pointer; font-size: 11px; font-family: inherit;">🚗 交通</button>
+            <button onclick="selectType('food', this)" class="type-btn" style="padding: 10px 0; border: 2px solid #1a1a1a; border-radius: 8px; background: #fff; cursor: pointer; font-size: 11px; font-family: inherit;">🍱 飲食</button>
+            <button onclick="selectType('gift', this)" class="type-btn" style="padding: 10px 0; border: 2px solid #1a1a1a; border-radius: 8px; background: #fff; cursor: pointer; font-size: 11px; font-family: inherit;">🛍️ 紀念品</button>
+            <button onclick="selectType('ticket', this)" class="type-btn" style="padding: 10px 0; border: 2px solid #1a1a1a; border-radius: 8px; background: #fff; cursor: pointer; font-size: 11px; font-family: inherit;">🎟️ 門票</button>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <input type="text" id="in-name" placeholder="項目名稱" style="padding: 12px; border: 2px solid #1a1a1a; border-radius: 8px; font-family: inherit;">
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="in-amount" placeholder="金額" style="flex: 1; padding: 12px; border: 2px solid #1a1a1a; border-radius: 8px; font-family: inherit;">
+                <button onclick="addExp()" style="background: #1a1a1a; color: #fff; border: none; padding: 0 25px; border-radius: 8px; font-weight: bold; cursor: pointer;">＋</button>
+            </div>
+            <div id="exchange-hint" style="font-size: 10px; color: #888; text-align: right; text-transform: none;">* 將以 1 HKD = 4.1 TWD 自動換算</div>
+        </div>
+    </div>
+
+    <div id="exp-list-container" style="background: #fff; border: 2px solid #1a1a1a; border-radius: 20px; overflow: hidden; margin-bottom: 25px;">
+        <div style="padding: 12px 15px; border-bottom: 2px solid #1a1a1a; background: #1a1a1a; color: #fff; font-weight: bold; font-size: 12px;">DETAIL_LIST</div>
+        <div id="exp-items" style="max-height: 350px; overflow-y: auto;"></div>
+    </div>
+</div>
+
+<style>
+    .type-btn.active { background: #1a1a1a !important; color: #fff !important; }
+</style>
+
+<script>
+const EXCHANGE_RATE = 4.1; // 匯率設定
+const PREPAID_TOTAL = 17907; // 5767+3469+359+312+8000
+
+const typeConfig = {
+    transport: { label: "🚗 交通", color: "#4c6a92", bg: "#edf1f5" },
+    food: { label: "🍱 飲食", color: "#d64d4d", bg: "#fbeeee" },
+    gift: { label: "🛍️ 紀念品", color: "#5e8c61", bg: "#f0f5f1" },
+    ticket: { label: "🎟️ 門票", color: "#b53d6e", bg: "#f8edf2" }
+};
+
+let expenses = [
+    { name: "迪士尼(含餐券)", type: "ticket", amt: 3266, currency: "TWD" },
+    { name: "機場快線(來回)", type: "transport", amt: 172, currency: "HKD" }, // 示範港幣輸入
+    { name: "太平山頂纜車", type: "ticket", amt: 128, currency: "HKD" }
+];
+
+let currentSelectedType = 'transport';
+let inputCurrency = 'TWD'; // 預設輸入幣別
+
+function toggleCurrency() {
+    inputCurrency = (inputCurrency === 'TWD') ? 'HKD' : 'TWD';
+    document.getElementById('cur-twd').style.color = (inputCurrency === 'TWD') ? '#1a1a1a' : '#ccc';
+    document.getElementById('cur-hkd').style.color = (inputCurrency === 'HKD') ? '#1a1a1a' : '#ccc';
+    document.getElementById('in-amount').placeholder = `金額 (${inputCurrency})`;
+}
+
+function selectType(type, btnEl) {
+    currentSelectedType = type;
+    document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+    btnEl.classList.add('active');
+}
+
+function updateUI(scrollToBottom = false) {
+    let currentTotalTWD = 0;
+    let listHtml = "";
+
+    expenses.forEach((item, index) => {
+        const config = typeConfig[item.type];
+        // 換算為台幣計入總預算
+        const amtInTWD = item.currency === 'HKD' ? Math.round(item.amt * EXCHANGE_RATE) : parseInt(item.amt);
+        currentTotalTWD += amtInTWD;
+        
+        listHtml += `
+            <div id="exp-item-${index}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border-bottom: 1px solid #eee; text-transform: none;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 10px; font-weight: bold; color: ${config.color}; background: ${config.bg}; padding: 2px 6px; border-radius: 4px; align-self: flex-start;">
+                        ${config.label}
+                    </span>
+                    <span style="font-size: 13px; font-weight: bold; color: #1a1a1a;">${item.name}</span>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-weight: 700; font-size: 14px;">NT$ ${amtInTWD.toLocaleString()}</div>
+                    ${item.currency === 'HKD' ? `<div style="font-size: 10px; color: #999;">(HK$ ${item.amt})</div>` : ''}
+                </div>
+                <button onclick="deleteExp(${index})" style="background:none; border:none; color:#eee; cursor:pointer; margin-left:10px;">×</button>
+            </div>`;
+    });
+
+    const grandTotal = PREPAID_TOTAL + currentTotalTWD;
+    document.getElementById('display-grand-total').innerText = grandTotal.toLocaleString();
+    document.getElementById('exp-items').innerHTML = listHtml;
+    
+    let progress = Math.min((grandTotal / 35000) * 100, 100);
+    document.getElementById('budget-progress').style.width = progress + "%";
+
+    if (scrollToBottom) {
+        const container = document.getElementById('exp-items');
+        container.scrollTop = container.scrollHeight;
+    }
+}
+
+function addExp() {
+    const nameEl = document.getElementById('in-name');
+    const amtEl = document.getElementById('in-amount');
+
+    if (nameEl.value && amtEl.value) {
+        expenses.push({ 
+            name: nameEl.value, 
+            type: currentSelectedType, 
+            amt: parseFloat(amtEl.value),
+            currency: inputCurrency
+        });
+        updateUI(true);
+        nameEl.value = "";
+        amtEl.value = "";
+        nameEl.focus();
+    }
+}
+
+function deleteExp(index) {
+    if(confirm("刪除此項目？")) {
+        expenses.splice(index, 1);
+        updateUI();
+    }
+}
+
+updateUI();
+</script>
+        
+          
+<div id="shop" class="tab-content" style="background-color: #f9f7f2; color: #1a1a1a; font-family: 'Helvetica', 'Arial', sans-serif; padding: 15px; text-transform: none;">
+    
+    <header style="border-bottom: 3px solid #1a1a1a; padding-bottom: 10px; margin-bottom: 25px;">
+        <div style="font-family: 'Times New Roman', serif; font-size: clamp(32px, 8vw, 48px); font-weight: 900; line-height: 0.9;">CITY GUIDE</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+            <div style="font-size: 10px; font-weight: bold; letter-spacing: 1px; background: #1a1a1a; color: #fff; padding: 2px 6px;">ISSUE 01 / JAN 2026</div>
+            <div style="font-size: 10px; font-weight: bold;">HONG KONG & MACAU</div>
+        </div>
+    </header>
+
+    <div class="magazine-layout">
+
+        <section class="spot-magazine-block">
+            <div class="spot-img-container">
+                <img src="https://images.unsplash.com/photo-1554492548-66270830491a?q=80&w=800" class="spot-img">
+                <span class="spot-label">#01 MONG KOK</span>
+            </div>
+            <div class="spot-text-content">
+                <h3 class="spot-h3">旺角：老港味的垂直生活</h3>
+                <p class="spot-p">入住平安大廈是一場冒險。在熙來攘往的彌敦道旁，走進<b>「黑地」</b>挑選一只搪瓷杯，或是到星際城市尋找一台底片相機。這就是 City Boy 的旅行態度：在混亂中尋找質感。</p>
+                <div class="spot-meta">📍 旺角站 / 平安大廈 / 黑地</div>
+            </div>
+        </section>
+
+        <section class="spot-magazine-block row-reverse">
+            <div class="spot-img-container small">
+                <img src="https://images.unsplash.com/photo-1542301197-ec6af60096cd?q=80&w=800" class="spot-img">
+                <span class="spot-label" style="background:#4c6a92">#02 SSP</span>
+            </div>
+            <div class="spot-text-content">
+                <h3 class="spot-h3">深水埗：雅俗共想的選物</h3>
+                <p class="spot-p">鴨寮街不只有電子零件，<b>「雅俗共想」</b>裡的黑膠與舊雜誌才是靈魂。買一份合益泰豬腸粉，坐在路邊觀察這座城市的脈動。</p>
+                <div class="spot-meta">📍 深水埗 C2 出口 / 雅俗共想</div>
+            </div>
+        </section>
+
+        <section class="spot-magazine-block special-accent">
+            <div class="spot-img-container">
+                <img src="https://images.unsplash.com/photo-1533423851083-02f5e27a6c93?q=80&w=800" class="spot-img">
+                <span class="spot-label" style="background:#e94e77">#03 DISNEY</span>
+            </div>
+            <div class="spot-text-content">
+                <h3 class="spot-h3">迪士尼：夢幻與現代的交織</h3>
+                <p class="spot-p">World of Frozen 開幕後，這裡是必經之地。除了設施，園內的字體設計與色彩配置也值得 City Boy 留心紀錄。</p>
+                <div class="spot-meta">📍 迪士尼線 / 魔雪奇緣世界</div>
+            </div>
+        </section>
+
+    </div>
+
+    <footer style="margin-top: 50px; border-top: 1px solid #1a1a1a; padding: 20px 0; text-align: center;">
+        <div style="font-family: 'Times New Roman', serif; font-style: italic; font-size: 14px;">"To be a City Boy, keep your eyes open."</div>
+    </footer>
+</div>
+<footer>-- Copyright©2026 Chiung Chen Lee, All Rights Reserved --</footer>
+
+<style>
+    /* 自適應佈局的核心 CSS */
+    .magazine-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .spot-magazine-block {
+        display: flex;
+        flex-direction: column; /* 手機版預設垂直 */
+        gap: 15px;
+    }
+
+    /* 平板與桌機版自動切換為橫向左右排版 */
+    @media (min-width: 600px) {
+        .spot-magazine-block {
+            flex-direction: row;
+            align-items: flex-start;
+        }
+        .spot-magazine-block.row-reverse {
+            flex-direction: row-reverse;
+        }
+        .spot-img-container {
+            flex: 1.2;
+        }
+        .spot-text-content {
+            flex: 1;
+        }
+        .spot-img-container.small {
+            flex: 0.8;
+        }
+    }
+
+    .spot-img-container {
+        position: relative;
+        border: 1px solid #1a1a1a;
+        background: #fff;
+        padding: 5px;
+    }
+
+    .spot-img {
+        width: 100%;
+        height: auto;
+        display: block;
+        filter: contrast(1.1); /* 增加雜誌感的對比度 */
+    }
+
+    .spot-label {
+        position: absolute;
+        top: -8px;
+        left: 10px;
+        background: #ffcc00;
+        color: #1a1a1a;
+        padding: 2px 8px;
+        font-size: 10px;
+        font-weight: 900;
+        border: 2px solid #1a1a1a;
+        transform: rotate(-2deg);
+    }
+
+    .spot-h3 {
+        font-size: 20px;
+        font-weight: 900;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .spot-p {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #333;
+        margin: 0 0 10px 0;
+        text-align: justify;
+    }
+
+    .spot-meta {
+        font-size: 10px;
+        font-weight: bold;
+        color: #777;
+        border-top: 1px solid #ddd;
+        padding-top: 8px;
+    }
+
+    /* 特別強調區塊樣式 */
+    .special-accent {
+        background: #fff;
+        padding: 15px;
+        border: 2px solid #1a1a1a;
+        box-shadow: 8px 8px 0px #eee;
+    }
+</style>
+
+<script>
+    // 主分頁切換 (01-07)
+    function showTab(tabId, bgColorVar) {
+        // 1. 切換顯示內容
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+
+        // 2. 切換背景色
+        document.getElementById('body').style.backgroundColor = `var(${bgColorVar})`;
+
+        // 3. 修正導航按鈕底線 (改用 event.currentTarget)
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        }
+
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    // ITIN 內部的天數切換
+    function showItinDay(dayId) {
+        // 隱藏所有 ITIN 天數
+        document.querySelectorAll('.itin-day-content').forEach(d => d.style.display = 'none');
+        // 顯示選擇的天數
+        document.getElementById(dayId).style.display = 'block';
+        
+        // 切換按鈕透明度視覺
+        const buttons = event.currentTarget.parentNode.querySelectorAll('button');
+        buttons.forEach(btn => btn.style.opacity = '0.5');
+        event.currentTarget.style.opacity = '1';
+    }
+</script>
+
+</body>
+</html>

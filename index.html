@@ -802,7 +802,7 @@
             <div style="background:#fff; padding:6px; border:1px solid #ddd; border-radius:4px; grid-column: span 2;">💵 換匯(達叔): NT$ 8,000</div>
         </div>
     </div>
-  
+
     <div style="background: #fff; border: 2px solid #1a1a1a; border-radius: 15px; padding: 15px; margin-bottom: 25px; box-shadow: 6px 6px 0px var(--black);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <div style="font-size: 11px; font-weight: bold; color: #666;">ADD NEW EXPENSE</div>
@@ -912,32 +912,21 @@ function updateUI(scrollToBottom = false) {
     }
 }
 
-async function addExp() {
+function addExp() {
     const nameEl = document.getElementById('in-name');
     const amtEl = document.getElementById('in-amount');
-    const GAS_URL = "1_rj_WAqZMCGzTUjG-nWV4_wwByHfZldUQbR3Q8dQ4Oo"; // 貼上剛剛複製的 /exec 網址
 
     if (nameEl.value && amtEl.value) {
-        const newExp = { 
+        expenses.push({ 
             name: nameEl.value, 
             type: currentSelectedType, 
             amt: parseFloat(amtEl.value),
-            currency: inputCurrency 
-        };
-
-        // 1. 本地立即顯示
-        expenses.push(newExp);
-        updateUI(true);
-
-        // 2. 背景傳送至雲端 (不卡網頁)
-        fetch(GAS_URL, {
-            method: "POST",
-            mode: 'no-cors', // 重要：解決跨域問題
-            body: JSON.stringify(newExp)
+            currency: inputCurrency
         });
-
+        updateUI(true);
         nameEl.value = "";
         amtEl.value = "";
+        nameEl.focus();
     }
 }
 
@@ -949,20 +938,7 @@ function deleteExp(index) {
 }
 
 updateUI();
-window.addEventListener('load', async () => {
-    try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbxkPn6v1RoeUN7ad7slg24PGybxLUx3wgg1t8Fr6VJUMYcp0c8VuvEoZNoKiBn9tMldjw/exec");
-        const cloudData = await response.json();
-        
-        // 將雲端資料合併到你原本已有的預算陣列中
-        if (cloudData && cloudData.length > 0) {
-            expenses = expenses.concat(cloudData);
-            updateUI(); 
-        }
-    } catch (e) {
-        console.log("雲端無資料或連線失敗，維持預設。");
-    }
-});
+  
   
 </script>
         
